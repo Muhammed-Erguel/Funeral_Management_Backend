@@ -1,84 +1,83 @@
 ﻿using Funeral_Management_Backend.Data;
+using Funeral_Management_Backend.DTOs.User;
 using Funeral_Management_Backend.Models;
-using Funeral_Management_Backend.Data;
-using Funeral_Management_Backend.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Funeral_Management_Backend.Controllers;
+namespace Funeral_Management.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/companies/{companyId:int}/users")]
 public class UsersController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly PasswordHasher<User> _passwordHasher = new();
+    private readonly PasswordHasher<User> _passwordHasher;
 
     public UsersController(AppDbContext context)
     {
         _context = context;
+        _passwordHasher = new PasswordHasher<User>();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(int companyId)
+    {
+        var users = await _context.Users
+            .AsNoTracking()
+            .Where(u => u.CompanyId == companyId)
+            .Select(u => new UserResponseDto
+            {
+                Id = u.Id,
+                CompanyId = u.CompanyId,
+                Email = u.Email,
+                Role = u.Role,
+                CreatedAt = u.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(users);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateUser(CreateUserDto dto)
+    public async Task<IActionResult> Create(int companyId, CreateUserDto dto)
     {
-        // Prüfen, ob E-Mail bereits existiert
-        bool exists = await _context.Users
+        var companyExists = await _context.Companies
+            .AnyAsync(c => c.Id == companyId);
+
+        if (!companyExists)
+            return NotFound("Company not found.");
+
+        var emailExists = await _context.Users
             .AnyAsync(u => u.Email == dto.Email);
 
-        if (exists)
-        {
-            return Conflict("Ein Benutzer mit dieser E-Mail existiert bereits.");
-        }
+        if (emailExists)
+            return Conflict("Email already exists.");
 
         var user = new User
         {
-            Id = Guid.NewGuid(),
+            CompanyId = companyId,
             Email = dto.Email,
             Role = dto.Role,
             CreatedAt = DateTime.UtcNow
         };
 
-        // Passwort hashen
         user.PasswordHash =
             _passwordHasher.HashPassword(user, dto.Password);
 
         _context.Users.Add(user);
-
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(
-            nameof(GetUser),
-            new { id = user.Id },
-            new
+            nameof(GetAll),
+            new { companyId },
+            new UserResponseDto
             {
-                user.Id,
-                user.Email,
-                user.Role,
-                user.CreatedAt
+                Id = user.Id,
+                CompanyId = user.CompanyId,
+                Email = user.Email,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt
             });
-    }
-
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetUser(Guid id)
-    {
-        var user = await _context.Users
-            .Where(u => u.Id == id)
-            .Select(u => new
-            {
-                u.Id,
-                u.Email,
-                u.Role,
-                u.CreatedAt
-            })
-            .FirstOrDefaultAsync();
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(user);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Funeral_Management_Backend.DTOs;
+﻿namespace Funeral_Management_Backend.DTOs.User;
 
 public class CreateUserDto
 {
