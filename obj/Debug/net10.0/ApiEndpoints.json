@@ -423,7 +423,7 @@
   {
     "ContainingType": "Funeral_Management_Backend.Controllers.DocumentsController",
     "Method": "GetAll",
-    "RelativePath": "api/Documents",
+    "RelativePath": "api/documents",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -433,7 +433,7 @@
   {
     "ContainingType": "Funeral_Management_Backend.Controllers.DocumentsController",
     "Method": "Create",
-    "RelativePath": "api/Documents",
+    "RelativePath": "api/documents",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -449,7 +449,7 @@
   {
     "ContainingType": "Funeral_Management_Backend.Controllers.DocumentsController",
     "Method": "GetById",
-    "RelativePath": "api/Documents/{id}",
+    "RelativePath": "api/documents/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -465,7 +465,7 @@
   {
     "ContainingType": "Funeral_Management_Backend.Controllers.DocumentsController",
     "Method": "Update",
-    "RelativePath": "api/Documents/{id}",
+    "RelativePath": "api/documents/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -486,7 +486,7 @@
   {
     "ContainingType": "Funeral_Management_Backend.Controllers.DocumentsController",
     "Method": "Delete",
-    "RelativePath": "api/Documents/{id}",
+    "RelativePath": "api/documents/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -502,7 +502,7 @@
   {
     "ContainingType": "Funeral_Management_Backend.Controllers.DocumentsController",
     "Method": "GetByCase",
-    "RelativePath": "api/Documents/case/{caseId}",
+    "RelativePath": "api/documents/case/{caseId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

@@ -601,7 +601,7 @@
         }
       }
     },
-    "/api/Documents": {
+    "/api/documents": {
       "get": {
         "tags": [
           "Documents"
@@ -642,7 +642,7 @@
         }
       }
     },
-    "/api/Documents/{id}": {
+    "/api/documents/{id}": {
       "get": {
         "tags": [
           "Documents"
@@ -726,7 +726,7 @@
         }
       }
     },
-    "/api/Documents/case/{caseId}": {
+    "/api/documents/case/{caseId}": {
       "get": {
         "tags": [
           "Documents"
