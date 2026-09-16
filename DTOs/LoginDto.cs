@@ -1,4 +1,4 @@
-﻿namespace Funeral_Management.DTOs.Auth;
+﻿namespace Funeral_Management_Backend.DTOs.Auth;
 
 public class LoginDto
 {

@@ -1,4 +1,4 @@
-﻿namespace Funeral_Management.DTOs.CaseContact;
+﻿namespace Funeral_Management_Backend.DTOs.CaseContact;
 
 public class AddCaseContactDto
 {

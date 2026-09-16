@@ -1,5 +1,6 @@
 ﻿using Funeral_Management_Backend.Data;
 using Funeral_Management.DTOs.Company;
+using Funeral_Management_Backend.Services.CurrentUser;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,12 @@ namespace Funeral_Management.Controllers;
 public class CompaniesController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ICurrentUserService _currentUser;
 
-    public CompaniesController(AppDbContext context)
+    public CompaniesController(AppDbContext context, ICurrentUserService currentUser)
     {
         _context = context;
+        _currentUser = currentUser;
     }
 
     [HttpGet("{id:int}")]

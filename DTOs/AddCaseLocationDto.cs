@@ -1,4 +1,4 @@
-﻿namespace Funeral_Management.DTOs.CaseLocation;
+﻿namespace Funeral_Management_Backend.DTOs.CaseLocation;
 
 public class AddCaseLocationDto
 {

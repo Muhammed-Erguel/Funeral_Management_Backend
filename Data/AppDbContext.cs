@@ -21,6 +21,8 @@ public class AppDbContext : DbContext
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<TwoFactorCode> TwoFactorCodes => Set<TwoFactorCode>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,6 +39,8 @@ public class AppDbContext : DbContext
         ConfigureDocument(modelBuilder);
         ConfigureTask(modelBuilder);
         ConfigureAuditLog(modelBuilder);
+        ConfigureTwoFactorCode(modelBuilder);
+        ConfigureRefreshToken(modelBuilder);
     }
 
     private static void ConfigureCompany(ModelBuilder modelBuilder)
@@ -118,6 +122,11 @@ public class AppDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(50);
 
+            entity.Property(u => u.TwoFactorEnabled)
+                .HasColumnName("two_factor_enabled")
+                .IsRequired()
+                .HasDefaultValue(false);
+
             entity.Property(u => u.CreatedAt)
                 .HasColumnName("created_at");
 
@@ -125,6 +134,52 @@ public class AppDbContext : DbContext
                 .WithMany(c => c.Users)
                 .HasForeignKey(u => u.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureTwoFactorCode(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TwoFactorCode>(entity =>
+        {
+            entity.ToTable("two_factor_codes");
+
+            entity.HasKey(t => t.Id);
+
+            entity.Property(t => t.Id)
+                .HasColumnName("two_factor_code_id");
+
+            entity.Property(t => t.UserId)
+                .HasColumnName("user_id");
+
+            entity.Property(t => t.CodeHash)
+                .HasColumnName("code_hash")
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(t => t.Purpose)
+                .HasColumnName("purpose")
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(t => t.ExpiresAt)
+                .HasColumnName("expires_at");
+
+            entity.Property(t => t.UsedAt)
+                .HasColumnName("used_at");
+
+            entity.Property(t => t.AttemptCount)
+                .HasColumnName("attempt_count")
+                .HasDefaultValue(0);
+
+            entity.Property(t => t.CreatedAt)
+                .HasColumnName("created_at");
+
+            entity.HasIndex(t => t.UserId);
+
+            entity.HasOne(t => t.User)
+                .WithMany(u => u.TwoFactorCodes)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
@@ -197,12 +252,12 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(c => c.CreatedByUser)
-                .WithMany(u => u.CreatedCases)
+                .WithMany()
                 .HasForeignKey(c => c.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(c => c.UpdatedByUser)
-                .WithMany(u => u.UpdatedCases)
+                .WithMany()
                 .HasForeignKey(c => c.UpdatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
         });
@@ -507,7 +562,7 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(d => d.UploadedByUser)
-                .WithMany(u => u.UploadedDocuments)
+                .WithMany()
                 .HasForeignKey(d => d.UploadedBy)
                 .OnDelete(DeleteBehavior.Restrict);
         });
@@ -580,7 +635,7 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasOne(t => t.CreatedByUser)
-                .WithMany(u => u.CreatedTasks)
+                .WithMany()
                 .HasForeignKey(t => t.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
         });
@@ -632,7 +687,7 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(a => a.User)
-                .WithMany(u => u.AuditLogs)
+                .WithMany()
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -640,6 +695,34 @@ public class AppDbContext : DbContext
                 .WithMany(c => c.AuditLogs)
                 .HasForeignKey(a => a.CaseId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+    }
+
+    private static void ConfigureRefreshToken(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("refresh_tokens");
+
+            entity.HasKey(r => r.Id);
+
+            entity.Property(r => r.TokenHash)
+                .IsRequired()
+                .HasMaxLength(64);
+
+            entity.Property(r => r.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(r => r.CreatedAt)
+                .IsRequired();
+
+            entity.HasIndex(r => r.TokenHash)
+                .IsUnique();
+
+            entity.HasOne(r => r.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -523,6 +523,41 @@ namespace Funeral_Management_Backend.Migrations
                     b.ToTable("locations", (string)null);
                 });
 
+            modelBuilder.Entity("Funeral_Management_Backend.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("refresh_tokens", (string)null);
+                });
+
             modelBuilder.Entity("Funeral_Management_Backend.Models.TaskItem", b =>
                 {
                     b.Property<int>("Id")
@@ -598,6 +633,56 @@ namespace Funeral_Management_Backend.Migrations
                     b.ToTable("tasks", (string)null);
                 });
 
+            modelBuilder.Entity("Funeral_Management_Backend.Models.TwoFactorCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("two_factor_code_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttemptCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempt_count");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("code_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("purpose");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("two_factor_codes", (string)null);
+                });
+
             modelBuilder.Entity("Funeral_Management_Backend.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -632,6 +717,15 @@ namespace Funeral_Management_Backend.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("role");
 
+                    b.Property<bool>("TwoFactorEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("two_factor_enabled");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
@@ -656,7 +750,7 @@ namespace Funeral_Management_Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Funeral_Management_Backend.Models.User", "User")
-                        .WithMany("AuditLogs")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -677,13 +771,13 @@ namespace Funeral_Management_Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Funeral_Management_Backend.Models.User", "CreatedByUser")
-                        .WithMany("CreatedCases")
+                        .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Funeral_Management_Backend.Models.User", "UpdatedByUser")
-                        .WithMany("UpdatedCases")
+                        .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -758,7 +852,7 @@ namespace Funeral_Management_Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Funeral_Management_Backend.Models.User", "UploadedByUser")
-                        .WithMany("UploadedDocuments")
+                        .WithMany()
                         .HasForeignKey("UploadedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -792,6 +886,17 @@ namespace Funeral_Management_Backend.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Funeral_Management_Backend.Models.RefreshToken", b =>
+                {
+                    b.HasOne("Funeral_Management_Backend.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Funeral_Management_Backend.Models.TaskItem", b =>
                 {
                     b.HasOne("Funeral_Management_Backend.Models.Case", "Case")
@@ -806,7 +911,7 @@ namespace Funeral_Management_Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Funeral_Management_Backend.Models.User", "CreatedByUser")
-                        .WithMany("CreatedTasks")
+                        .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -823,6 +928,17 @@ namespace Funeral_Management_Backend.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("Funeral_Management_Backend.Models.TwoFactorCode", b =>
+                {
+                    b.HasOne("Funeral_Management_Backend.Models.User", "User")
+                        .WithMany("TwoFactorCodes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Funeral_Management_Backend.Models.User", b =>
@@ -885,15 +1001,9 @@ namespace Funeral_Management_Backend.Migrations
 
             modelBuilder.Entity("Funeral_Management_Backend.Models.User", b =>
                 {
-                    b.Navigation("AuditLogs");
+                    b.Navigation("RefreshTokens");
 
-                    b.Navigation("CreatedCases");
-
-                    b.Navigation("CreatedTasks");
-
-                    b.Navigation("UpdatedCases");
-
-                    b.Navigation("UploadedDocuments");
+                    b.Navigation("TwoFactorCodes");
                 });
 #pragma warning restore 612, 618
         }
